@@ -15,7 +15,16 @@ def check_price_amazon():
 
     if response.ok:
         soup = BeautifulSoup(response.content, 'html.parser')
+        title = soup.find(id="productTitle").get_text()
+        title = title.strip()
+        price = soup.find(id="priceblock_ourprice").get_text()
+        converted_price = float(price[1:])
 
+        print(f"Tracking item: {title}")
+        print(f"Current price: {converted_price}")
+
+        if (converted_price <= desiredPrice):
+            send_mail(sendTo, desiredPrice, title)
 
 
 def check_price_ebay():
