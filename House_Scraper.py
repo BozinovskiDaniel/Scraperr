@@ -17,22 +17,21 @@ def convert_price(price):
     
     if '-' in price:
         array = price.split('-')
-        first = (array[0].replace(',', '')).replace('$', '')
-        second = (array[1].replace(',', '')).replace('$', '')
-        newPrice = (int(first) + int(second))/2
-    elif 'to' in price:
-        array = price.split('to')
-        first = (array[0].replace(',', '')).replace('$', '')
-        second = (array[1].replace(',', '')).replace('$', '')
-        newPrice = (int(first) + int(second))/2
+        newPrice = (array[0].replace(',', '')).replace('$', '')
     else:
         array = price.split(' ')
         newPrice = (array[0].replace(',', '')).replace('$', '')
 
-    return float(newPrice)
+    return int(newPrice)
 
 def test_one():
     assert convert_price('$738,000 negotiable ') == 738000
+
+def test_two():
+    assert convert_price('$650,000 - CONTACT AGENT ') == 650000
+
+def test_three():
+    assert convert_price('$693,690 Walking to future Business Park ') == 693690
 
 
 # Gets the property info on the given page
@@ -45,7 +44,7 @@ def getPropertyInfo(pageNum):
     # https://www.domain.com.au/sale/marsden-park-nsw-2765/?keywords=nsw&sort=price-asc&page=
     # https://www.domain.com.au/sale/?excludeunderoffer=1&page=
 
-    url = 'https://www.domain.com.au/sale/marsden-park-nsw-2765/?keywords=nsw&sort=price-asc&page=' + str(pageNum)
+    url = 'https://www.domain.com.au/sale/wetherill-park-nsw-2164/?excludeunderoffer=1&page=' + str(pageNum)
     response  = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -61,13 +60,14 @@ def getPropertyInfo(pageNum):
 
         if price == None or location ==  None or property_type == None or (price.text)[0] != '$':
             continue
+        elif ('m' in (price.text)) or ('k' in (price.text)) or ('M' in (price.text)) or ('K' in (price.text)):
+            continue
         else:
-            prices.append(price.text)
+            prices.append(convert_price(price.text))
             newLocation = (location.text).replace(',\xa0', '')
             locations.append(newLocation)
             property_types.append(property_type.text)
             urls.append(link[0].get('href'))
-
             suburbs.append((suburb.text).replace(' ', ', '))
 
 ###############################
@@ -96,6 +96,6 @@ df = DataFrame(properties, columns = ['Type', 'Suburb', 'Location', 'Price', 'UR
 
 print('########## Exporting Data ##########')
 
-export_excel = df.to_excel (r'C:\Users\bozin\Desktop\MarsdenPark.xlsx', index = None, header=True)
+export_excel = df.to_excel (r'C:\Users\bozin\Desktop\WetherillPark.xlsx', index = None, header=True)
 
 print('########## COMPLETE!!! ##########')
