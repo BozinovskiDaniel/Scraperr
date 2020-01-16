@@ -1,21 +1,51 @@
-### Imports
+### Imports ###
 from bs4 import BeautifulSoup
+import re
 import requests
 from pandas import DataFrame
 import itertools
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy
 ################
 
 sns.set()
 headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
 
-# Properties = {'type': [], 'location': [], 'price': []}
+########## FUNCTIONS ##########
+def convert_price(price):
+    
+    if '-' in price:
+        array = price.split('-')
+        first = (array[0].replace(',', '')).replace('$', '')
+        second = (array[1].replace(',', '')).replace('$', '')
+        newPrice = (int(first) + int(second))/2
+    elif 'to' in price:
+        array = price.split('to')
+        first = (array[0].replace(',', '')).replace('$', '')
+        second = (array[1].replace(',', '')).replace('$', '')
+        newPrice = (int(first) + int(second))/2
+    else:
+        array = price.split(' ')
+        newPrice = (array[0].replace(',', '')).replace('$', '')
+
+    return float(newPrice)
+
+def test_one():
+    assert convert_price('$738,000 negotiable ') == 738000
+
 
 # Gets the property info on the given page
 def getPropertyInfo(pageNum):
 
-    url = 'https://www.domain.com.au/sale/wetherill-park-nsw-2164/?excludeunderoffer=1&page=' + str(pageNum)
+    # https://www.domain.com.au/sale/wetherill-park-nsw-2164/?excludeunderoffer=1&page=
+    # https://www.domain.com.au/sale/west-wollongong-nsw-2500/?excludeunderoffer=1&page=
+    # https://www.domain.com.au/sale/kellyville-nsw-2155/?excludeunderoffer=1&page=
+    # https://www.domain.com.au/sale/jervis-bay-nsw-2540/?excludeunderoffer=1&page=
+    # https://www.domain.com.au/sale/marsden-park-nsw-2765/?keywords=nsw&sort=price-asc&page=
+    # https://www.domain.com.au/sale/?excludeunderoffer=1&page=
+
+    url = 'https://www.domain.com.au/sale/marsden-park-nsw-2765/?keywords=nsw&sort=price-asc&page=' + str(pageNum)
     response  = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -28,6 +58,7 @@ def getPropertyInfo(pageNum):
         property_type = house.find('div', {'class': 'listing-result__property-type'})
         link = house.find_all('a')
 
+
         if price == None or location ==  None or property_type == None or (price.text)[0] != '$':
             continue
         else:
@@ -35,31 +66,36 @@ def getPropertyInfo(pageNum):
             newLocation = (location.text).replace(',\xa0', '')
             locations.append(newLocation)
             property_types.append(property_type.text)
-            links.append(link)
+            urls.append(link[0].get('href'))
+
             suburbs.append((suburb.text).replace(' ', ', '))
+
+###############################
 
 
 prices = []
 suburbs = []
 locations = []
 property_types = []
-links = []
+urls = []
 
 print('########## Fetching Data ##########')
 
-for i in range(1, 40):
+for i in range(1, 150):
     getPropertyInfo(i)
 
 
 properties = {'Type': property_types,
               'Suburb': suburbs,
               'Location': locations, 
-              'Price': prices
+              'Price': prices,
+              'URL': urls
               }
 
-df = DataFrame(properties, columns = ['Type', 'Suburb', 'Location', 'Price'])
+df = DataFrame(properties, columns = ['Type', 'Suburb', 'Location', 'Price', 'URL'])
 
 print('########## Exporting Data ##########')
-export_excel = df.to_excel (r'C:\Users\bozin\Desktop\HouseData.xlsx', index = None, header=True)
+
+export_excel = df.to_excel (r'C:\Users\bozin\Desktop\MarsdenPark.xlsx', index = None, header=True)
 
 print('########## COMPLETE!!! ##########')
