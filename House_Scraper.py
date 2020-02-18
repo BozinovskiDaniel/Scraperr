@@ -17,10 +17,10 @@ def convert_price(price):
     
     if '-' in price:
         array = price.split('-')
-        newPrice = (array[0].replace(',', '')).replace('$', '')
+        newPrice = ((array[0].replace(',', '')).replace('$', '')).replace('.', '')
     else:
         array = price.split(' ')
-        newPrice = (array[0].replace(',', '')).replace('$', '')
+        newPrice = ((array[0].replace(',', '')).replace('$', '')).replace('.', '')
 
     return int(newPrice)
 
@@ -44,7 +44,7 @@ def getPropertyInfo(pageNum):
     # https://www.domain.com.au/sale/marsden-park-nsw-2765/?keywords=nsw&sort=price-asc&page=
     # https://www.domain.com.au/sale/?excludeunderoffer=1&page=
 
-    url = 'https://www.domain.com.au/sale/wetherill-park-nsw-2164/?excludeunderoffer=1&page=' + str(pageNum)
+    url = 'https://www.domain.com.au/sale/schofields-nsw-2762/?excludeunderoffer=1&page=' + str(pageNum)
     response  = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -96,6 +96,6 @@ df = DataFrame(properties, columns = ['Type', 'Suburb', 'Location', 'Price', 'UR
 
 print('########## Exporting Data ##########')
 
-export_excel = df.to_excel (r'C:\Users\bozin\Desktop\WetherillPark.xlsx', index = None, header=True)
+export_excel = df.to_excel (r'C:\Users\bozin\Desktop\Schofields.xlsx', index = None, header=True)
 
 print('########## COMPLETE!!! ##########')

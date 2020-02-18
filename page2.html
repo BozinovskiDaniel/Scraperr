@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+ <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Daniel Bozinovski | Engineer</title>
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <meta name="author" content="SRBThemes" />
+
+        <link rel="shortcut icon" href="images/logo.jpg">
+
+        <!--Bootstrap Css-->
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" >
+        <link href='css/page2.css' rel="stylesheet">
+        
+    </head>
+
+<body>
+    <div class="top-section">
+        <h3 class='header-text'>Data Science</h3>
+        <h2 class='header-text'>Web Scraping House Prices Around NSW</h2>
+    </div>
+    
+    <div class="info-section">
+        <p>This project involved me web scraping a real estate website by the domain of <a href='https://www.domain.com.au/'>https://www.domain.com.au/</a>
+        <br>
+        Initially, we begin with importing all the relevant libraries that we'll need.
+        <br><br>
+        We use a library called <b>BeautifulSoup</b> to analyse the web page, and extract specific sections of the web page
+        that needed to be stored.
+        </p>
+
+        <pre>
+          <code>
+                from bs4 import BeautifulSoup
+                import requests
+                from pandas import DataFrame
+                import numpy
+          </code>
+        </pre>
+
+        <p>
+        We need to define our header as some websites may automatically block any type of scraping, as a means to pass along our get command.
+        To get your specific header, type 'My User Agent' onto your current browser and copy the header.
+        </p>
+        <pre>
+            <code>
+                headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
+            </code>
+          </pre>
+
+        <p>
+            Next, I created a few empty arrays to store data about each specific house. Each index of each array, all corresponded together for details about
+            a single property.
+        </p>
+
+        <pre>
+            <code>
+                prices = []
+                suburbs = []
+                locations = []
+                property_types = []
+                urls = []
+            </code>
+        </pre>
+
+        <p>Now we begin creating a function called getPropertyInfo, that should fill out those specific arrays.
+            Firstly, we need the <b>URL</b> of the page that we are going to scrape.
+        </p>
+        <pre>
+            <code>
+                url = 'https://www.domain.com.au/sale/wetherill-park-nsw-2164/?excludeunderoffer=1&page=' + str(pageNum)
+
+            </code>
+        </pre>
+
+        <p>We then need a response from the webpage so we use the requests function to get the response.
+            We also need to parse through the information so here's where we use <b>BeautifulSoup</b>. We pass in 
+            the responses content, with a 'html.parser' tag. We also inspect the source code to see what the tag 
+            and class is for each individual listing, so we can "findAll" and loop through each property.
+        </p>
+
+        <pre>
+            <code>
+                response  = requests.get(url, headers=headers)
+                soup = BeautifulSoup(response.content, 'html.parser')
+                houses = soup.findAll("li", {"class": "css-1b4kfhp"}) 
+            </code>
+        </pre>
+
+        <p>
+            Now, loop through each house and assign each bit of information you want to variables, such as the 
+            location of the house, price, etc.
+        </p>
+
+        <pre>
+            <code>
+                for house in houses:
+                    price = house.find('p', {'class': 'listing-result__price'})
+                    location = house.find('span', {'class': 'address-line1'})
+                    suburb = house.find('span', {'class': 'address-line2'})
+                    property_type = house.find('div', {'class': 'listing-result__property-type'})
+                    link = house.find_all('a')
+            </code>
+        </pre>
+
+        <p>
+            We finally examine each piece of data and see if we want it in our property list. If the price is not listed, 
+            or the price isn't an exact figure, we skip that particular property. Else, the properties information is 
+            appended to each list.
+        </p>
+        
+        <pre>
+            <code>
+                if price == None or location ==  None or property_type == None or (price.text)[0] != '$':
+                    continue
+                elif ('m' in (price.text)) or ('k' in (price.text)) or ('M' in (price.text)) or ('K' in (price.text)):
+                    continue
+                else:
+                    prices.append(convert_price(price.text))
+                    newLocation = (location.text).replace(',\xa0', '')
+                    locations.append(newLocation)
+                    property_types.append(property_type.text)
+                    urls.append(link[0].get('href'))
+                    suburbs.append((suburb.text).replace(' ', ', '))
+            </code>
+        </pre>
+
+        <p>Now we just export the data to an excel spreadsheet, to thoroughly analyse.</p>
+
+        <pre>
+            <code>
+                df = DataFrame(properties, columns = ['Type', 'Suburb', 'Location', 'Price', 'URL'])
+
+                export_excel = df.to_excel (r'C:\Users\bozin\Desktop\Schofields.xlsx', index = None, header=True)
+            </code>
+        </pre>
+
+        <img src = "../wpphoto.jpg" alt="graph">
+    </div>
+</body>
+
+</html>
