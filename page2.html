@@ -32,12 +32,14 @@
         that needed to be stored.
         </p>
 
+        <img src="./domainhome.jpg" class="imagecenter" alt="Graph" height="400" width="1000">
+
         <pre>
           <code>
-                from bs4 import BeautifulSoup
-                import requests
-                from pandas import DataFrame
-                import numpy
+    from bs4 import BeautifulSoup
+    import requests
+    from pandas import DataFrame
+    import numpy
           </code>
         </pre>
 
@@ -47,7 +49,8 @@
         </p>
         <pre>
             <code>
-                headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
+    headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
+              Chrome/79.0.3945.117 Safari/537.36'}
             </code>
           </pre>
 
@@ -58,11 +61,11 @@
 
         <pre>
             <code>
-                prices = []
-                suburbs = []
-                locations = []
-                property_types = []
-                urls = []
+    prices = []
+    suburbs = []
+    locations = []
+    property_types = []
+    urls = []
             </code>
         </pre>
 
@@ -71,7 +74,7 @@
         </p>
         <pre>
             <code>
-                url = 'https://www.domain.com.au/sale/wetherill-park-nsw-2164/?excludeunderoffer=1&page=' + str(pageNum)
+    url = 'https://www.domain.com.au/sale/wetherill-park-nsw-2164/?excludeunderoffer=1&page=' + str(pageNum)
 
             </code>
         </pre>
@@ -84,9 +87,9 @@
 
         <pre>
             <code>
-                response  = requests.get(url, headers=headers)
-                soup = BeautifulSoup(response.content, 'html.parser')
-                houses = soup.findAll("li", {"class": "css-1b4kfhp"}) 
+        response  = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        houses = soup.findAll("li", {"class": "css-1b4kfhp"}) 
             </code>
         </pre>
 
@@ -97,12 +100,12 @@
 
         <pre>
             <code>
-                for house in houses:
-                    price = house.find('p', {'class': 'listing-result__price'})
-                    location = house.find('span', {'class': 'address-line1'})
-                    suburb = house.find('span', {'class': 'address-line2'})
-                    property_type = house.find('div', {'class': 'listing-result__property-type'})
-                    link = house.find_all('a')
+    for house in houses:
+        price = house.find('p', {'class': 'listing-result__price'})
+        location = house.find('span', {'class': 'address-line1'})
+        suburb = house.find('span', {'class': 'address-line2'})
+        property_type = house.find('div', {'class': 'listing-result__property-type'})
+        link = house.find_all('a')
             </code>
         </pre>
 
@@ -114,17 +117,17 @@
         
         <pre>
             <code>
-                if price == None or location ==  None or property_type == None or (price.text)[0] != '$':
-                    continue
-                elif ('m' in (price.text)) or ('k' in (price.text)) or ('M' in (price.text)) or ('K' in (price.text)):
-                    continue
-                else:
-                    prices.append(convert_price(price.text))
-                    newLocation = (location.text).replace(',\xa0', '')
-                    locations.append(newLocation)
-                    property_types.append(property_type.text)
-                    urls.append(link[0].get('href'))
-                    suburbs.append((suburb.text).replace(' ', ', '))
+    if price == None or location ==  None or property_type == None or (price.text)[0] != '$':
+        continue
+    elif ('m' in (price.text)) or ('k' in (price.text)) or ('M' in (price.text)) or ('K' in (price.text)):
+        continue
+    else:
+        prices.append(convert_price(price.text))
+        newLocation = (location.text).replace(',\xa0', '')
+        locations.append(newLocation)
+        property_types.append(property_type.text)
+        urls.append(link[0].get('href'))
+        suburbs.append((suburb.text).replace(' ', ', '))
             </code>
         </pre>
 
@@ -132,13 +135,18 @@
 
         <pre>
             <code>
-                df = DataFrame(properties, columns = ['Type', 'Suburb', 'Location', 'Price', 'URL'])
+    df = DataFrame(properties, columns = ['Type', 'Suburb', 'Location', 'Price', 'URL'])
 
-                export_excel = df.to_excel (r'C:\Users\bozin\Desktop\Schofields.xlsx', index = None, header=True)
+    export_excel = df.to_excel (r'C:\Users\bozin\Desktop\Schofields.xlsx', index = None, header=True)
             </code>
         </pre>
 
-        <img src = "../wpphoto.jpg" alt="graph">
+        <img src="wpphoto.jpg" class="imagecenter" alt="Graph" height="400" width="1000">
+
+        <p>Through the spreadsheet and the graph, we can see that 'Horsley Park' has the highest average price sitting at $1,995,000  
+            compared to 'Prospect', which is the cheapest area sitting at $509,475.
+        </p>
+        <br>
     </div>
 </body>
 
